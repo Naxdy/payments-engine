@@ -1,0 +1,70 @@
+use crate::util::parse_decimal;
+use crate::util::serialize_decimal;
+use futures::StreamExt;
+use rust_decimal::Decimal;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "lowercase", tag = "type")]
+pub enum Type {
+    Deposit {
+        #[serde(
+            deserialize_with = "parse_decimal",
+            serialize_with = "serialize_decimal"
+        )]
+        amount: Decimal,
+    },
+    Withdrawal {
+        #[serde(
+            deserialize_with = "parse_decimal",
+            serialize_with = "serialize_decimal"
+        )]
+        amount: Decimal,
+    },
+    Dispute,
+    Resolve,
+    Chargeback,
+}
+
+#[derive(Default, Clone, Copy, PartialEq, Eq)]
+pub enum State {
+    /// A new transaction (just came in) that hasn't been processed yet.
+    #[default]
+    NeedsProcessing,
+
+    /// Transaction has been processed and funds have been either been credited to debited
+    /// successfully.
+    Processed,
+
+    /// This transaction is disputed, and the associated funds have been placed on hold.
+    Disputed,
+
+    /// This transaction has been charged back by the client.
+    ChargedBack,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Transaction {
+    pub client: u16,
+    pub tx: u32,
+
+    #[serde(flatten)]
+    pub tx_type: Type,
+
+    #[serde(skip, default)]
+    pub state: State,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Transactions(Vec<Transaction>);
+
+pub trait TransactionBackend {
+    /// Create a stream that returns all transactions in chronological order.
+    fn create_tx_stream(&self) -> impl StreamExt<Item = Transaction>;
+
+    /// Find a particular transaction.
+    fn find_transaction(&self, id: u32) -> impl Future<Output = Option<Transaction>> + Send;
+
+    /// Update the state of a transaction.
+    fn set_tx_state(&self, id: u32, state: State) -> impl Future<Output = ()> + Send;
+}

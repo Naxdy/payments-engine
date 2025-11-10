@@ -63,6 +63,7 @@
           full = pkgs.mkShell {
             packages = [
               treefmt
+              self.packages.${system}.default.passthru.rustToolchain
             ];
 
             inputsFrom = [ self.packages.${system}.default ];
