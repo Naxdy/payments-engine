@@ -1,0 +1,12 @@
+[package]
+name = "payments-engine"
+version = "0.1.0"
+edition = "2024"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -3 }
+nursery = { level = "warn", priority = -2 }
+unwrap_used = { level = "warn", priority = -1 }
+cognitive_complexity = { level = "allow", priority = 0 }
+
+[dependencies]
