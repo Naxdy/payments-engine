@@ -45,6 +45,7 @@ impl TransactionBackend for CsvBackend {
         reader.deserialize().find_map(|e: Result<Transaction, _>| {
             if let Ok(mut e) = e
                 && e.tx == id
+                && e.tx_type.is_root()
             {
                 e.state = tx_states
                     .get(&e.tx)

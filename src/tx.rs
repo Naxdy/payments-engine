@@ -4,7 +4,7 @@ use futures::StreamExt;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "lowercase", tag = "type")]
 pub enum Type {
     Deposit {
@@ -26,7 +26,18 @@ pub enum Type {
     Chargeback,
 }
 
-#[derive(Default, Clone, Copy, PartialEq, Eq)]
+impl Type {
+    /// Whether this is a "root" transaction, i.e. a transaction that does _not_ refer to other
+    /// transactions.
+    pub const fn is_root(&self) -> bool {
+        matches!(
+            self,
+            Self::Deposit { amount: _ } | Self::Withdrawal { amount: _ }
+        )
+    }
+}
+
+#[derive(Default, Clone, Copy, PartialEq, Eq, Debug)]
 pub enum State {
     /// A new transaction (just came in) that hasn't been processed yet.
     #[default]
@@ -43,7 +54,7 @@ pub enum State {
     ChargedBack,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Transaction {
     pub client: u16,
     pub tx: u32,
