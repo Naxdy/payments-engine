@@ -111,7 +111,7 @@ where
                                 break 'a;
                             };
 
-                            if tx.state != State::Processed {
+                            if tx.client != account.client || tx.state != State::Processed {
                                 break 'a;
                             }
 
@@ -126,7 +126,7 @@ where
                                 break 'a;
                             };
 
-                            if tx.state != State::Disputed {
+                            if tx.client != account.client || tx.state != State::Disputed {
                                 break 'a;
                             }
 
@@ -141,7 +141,7 @@ where
                                 break 'a;
                             };
 
-                            if tx.state != State::Disputed {
+                            if tx.client != account.client || tx.state != State::Disputed {
                                 break 'a;
                             }
 
