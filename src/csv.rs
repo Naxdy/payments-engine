@@ -6,6 +6,9 @@ use tokio::sync::RwLock;
 
 use crate::tx::{State, Transaction, TransactionBackend};
 
+// NOTE: With this implementation, tx states are accumulated in memory for every "root"
+// transaction, although individual transactions are only kept in memory for as long as they are
+// needed.
 pub struct CsvBackend {
     filepath: String,
     tx_states: RwLock<HashMap<u32, State>>,
