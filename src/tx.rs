@@ -55,9 +55,6 @@ pub struct Transaction {
     pub state: State,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct Transactions(Vec<Transaction>);
-
 pub trait TransactionBackend {
     /// Create a stream that returns all transactions in chronological order.
     fn create_tx_stream(&self) -> impl StreamExt<Item = Transaction>;

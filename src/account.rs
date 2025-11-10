@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use crate::tx::{State, TransactionBackend};
 use crate::util::serialize_decimal;
-use eyre::Result;
 use futures::StreamExt;
 use rust_decimal::Decimal;
 use serde::Serialize;
@@ -75,7 +74,7 @@ where
         self.accounts.read().await.values().cloned().collect()
     }
 
-    pub async fn process_tx_stream(&self) -> Result<()> {
+    pub async fn process_tx_stream(&self) {
         let stream = self.backend.create_tx_stream();
 
         stream
@@ -158,7 +157,5 @@ where
                 drop(accounts);
             })
             .await;
-
-        Ok(())
     }
 }
