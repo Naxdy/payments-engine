@@ -24,6 +24,7 @@ in
       semi = true;
       printWidth = 120;
       singleQuote = true;
+      proseWrap = "always";
     };
   };
 
