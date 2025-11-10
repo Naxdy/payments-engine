@@ -2,7 +2,6 @@
 /result
 /result-*
 /target
-*.csv
 
 
 # Added by cargo

@@ -1,7 +1,7 @@
 {
   craneLib,
   fenix,
-  crane,
+  lib,
 }:
 let
   rustToolchain = fenix.stable.withComponents [
@@ -21,7 +21,19 @@ let
     pname = cargoToml.workspace.package.name or cargoToml.package.name;
     version = cargoToml.workspace.package.version or cargoToml.package.version;
 
-    src = craneLib.cleanCargoSource ./.;
+    src =
+      let
+        pathFilter = path: type: builtins.match ".*pe-source/testdata.*" path != null;
+        sourceFilter = path: type: (pathFilter path type) || (craneLib'.filterCargoSources path type);
+      in
+      lib.cleanSourceWith {
+        src = builtins.path {
+          path = ./.;
+          name = "pe-source";
+        };
+        filter = sourceFilter;
+        name = "source";
+      };
 
     strictDeps = true;
 

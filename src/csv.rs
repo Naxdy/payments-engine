@@ -85,7 +85,7 @@ mod test {
 
         assert_eq!(
             accounts.iter().find(|e| e.client == 1).unwrap().total,
-            Decimal::new(15, 1)
+            Decimal::new(3, 0)
         );
         assert_eq!(
             accounts.iter().find(|e| e.client == 2).unwrap().total,
