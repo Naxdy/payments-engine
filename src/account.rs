@@ -87,8 +87,8 @@ where
 
                 let account = accounts.entry(item.client).or_insert_with(|| Account {
                     client: item.client,
-                    held: Decimal::new(0, 4),
-                    total: Decimal::new(0, 4),
+                    held: Decimal::new(0, 0),
+                    total: Decimal::new(0, 0),
                     locked: false,
                 });
 

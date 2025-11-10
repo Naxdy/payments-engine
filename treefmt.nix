@@ -31,8 +31,9 @@ in
   programs.typos = {
     enable = true;
     includes = [
-      "*.rs"
+      "*.md"
       "*.nix"
+      "*.rs"
     ];
   };
 }
