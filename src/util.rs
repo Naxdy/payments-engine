@@ -1,4 +1,4 @@
-use rust_decimal::Decimal;
+use rust_decimal::{Decimal, prelude::FromPrimitive};
 use serde::{Deserializer, Serializer, de::Visitor};
 
 pub fn parse_decimal<'de, D>(d: D) -> Result<Decimal, D::Error>
@@ -14,27 +14,24 @@ where
             formatter.write_str("a decimal number")
         }
 
-        fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+        fn visit_f64<E>(self, v: f64) -> Result<Self::Value, E>
         where
             E: serde::de::Error,
         {
-            let mut d = Decimal::from_str_exact(v)
-                .map_err(|e| serde::de::Error::custom(format!("failed to parse decimal: {e}")))?;
-
-            d.set_scale(4).map_err(|e| {
-                serde::de::Error::custom(format!("failed to set decimal scale: {e}"))
-            })?;
+            let d = Decimal::from_f64(v)
+                .ok_or_else(|| serde::de::Error::custom("failed to parse decimal"))?
+                .round_dp(4);
 
             Ok(d)
         }
     }
 
-    d.deserialize_str(DecimalVisitor)
+    d.deserialize_any(DecimalVisitor)
 }
 
 pub fn serialize_decimal<S>(value: &Decimal, s: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
-    s.serialize_str(&value.to_string())
+    s.serialize_str(&value.round_dp(4).to_string())
 }

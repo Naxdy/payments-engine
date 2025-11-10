@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use csv::{Reader, ReaderBuilder};
+use csv::ReaderBuilder;
 use futures::stream::{self};
 use tokio::sync::RwLock;
 
@@ -35,8 +35,10 @@ impl TransactionBackend for CsvBackend {
     }
 
     async fn find_transaction(&self, id: u32) -> Option<crate::tx::Transaction> {
-        let mut reader =
-            Reader::from_path(self.filepath.clone()).expect("failed to create csv reader");
+        let mut reader = ReaderBuilder::new()
+            .trim(csv::Trim::All)
+            .from_path(self.filepath.clone())
+            .expect("failed to create csv reader");
 
         let tx_states = self.tx_states.read().await;
 
@@ -57,5 +59,33 @@ impl TransactionBackend for CsvBackend {
 
     async fn set_tx_state(&self, id: u32, state: crate::tx::State) {
         self.tx_states.write().await.insert(id, state);
+    }
+}
+
+#[allow(clippy::unwrap_used)]
+#[cfg(test)]
+mod test {
+    use rust_decimal::Decimal;
+
+    use crate::{account::Vault, csv::CsvBackend};
+
+    #[tokio::test]
+    async fn csv_txns() {
+        let backend = CsvBackend::new(String::from("testdata/transactions.csv"));
+
+        let vault = Vault::new(backend);
+
+        vault.process_tx_stream().await;
+
+        let accounts = vault.get_accounts().await;
+
+        assert_eq!(
+            accounts.iter().find(|e| e.client == 1).unwrap().total,
+            Decimal::new(15, 1)
+        );
+        assert_eq!(
+            accounts.iter().find(|e| e.client == 2).unwrap().total,
+            Decimal::new(2, 0)
+        );
     }
 }
